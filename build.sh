@@ -1,0 +1,1 @@
+zip -r chrome-extension.zip src
