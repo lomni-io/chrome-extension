@@ -1,19 +1,8 @@
-let activeTab = null
 
 chrome.runtime.onConnectExternal.addListener(function(port) {
     console.log("onConnectExternal", port)
 
     chrome.tabs.onActivated.addListener((info) =>{
-        activeTab = info.tabId
-        console.log("onActivated", info)
-        chrome.tabs.get(info.tabId,(tab => {
-            port.postMessage({
-                kind: 'tab-change-response',
-                data: tab
-            });
-            console.log("info: ", tab)
-        }))
-
         chrome.tabs.query({currentWindow: true}, tabs => {
             port.postMessage({
                 kind: 'all-tabs-response',
@@ -33,23 +22,12 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
     })
 
     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) =>{
-        if (changeInfo.title || changeInfo.status === 'complete'){
-            chrome.tabs.query({currentWindow: true}, tabs => {
-                port.postMessage({
-                    kind: 'all-tabs-response',
-                    data: tabs
-                });
+        chrome.tabs.query({currentWindow: true}, tabs => {
+            port.postMessage({
+                kind: 'all-tabs-response',
+                data: tabs
             });
-        }
-        if (changeInfo.title || changeInfo.status === 'complete' && tab.active){
-            chrome.tabs.get(tabId,(tab => {
-                console.log('tab-change-response', tab)
-                port.postMessage({
-                    kind: 'tab-change-response',
-                    data: tab
-                });
-            }))
-        }
+        });
         console.log("onUpdated", tabId, changeInfo, tabId)
     })
 
@@ -67,6 +45,12 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         }
         if (msg.kind === 'open-request-existing-tab') {
             chrome.tabs.update(msg.tab, {active: true})
+        }
+        if (msg.kind === 'pin-tab') {
+            chrome.tabs.update(msg.tab, {pinned: true})
+        }
+        if (msg.kind === 'unpin-tab') {
+            chrome.tabs.update(msg.tab, {pinned: false})
         }
         if (msg.kind === 'open-request-new-tab') {
             chrome.tabs.create({
