@@ -99,14 +99,24 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         if (msg.kind === 'close-tabs') {
             chrome.tabs.remove(msg.tab)
         }
+        if (msg.kind === 'move-tab') {
+            chrome.tabs.move(msg.tab, {windowId: msg.windowId, index: msg.index})
+        }
+        if (msg.kind === 'group-tabs') {
+            chrome.tabs.group({tabIds: msg.tabs, groupId: msg.groupId})
+        }
         if (msg.kind === 'unpin-tab') {
             chrome.tabs.update(msg.tab, {pinned: false})
         }
-        if (msg.kind === 'open-request-new-tab') {
-            chrome.tabs.create({
-                url: msg.url,
-                pinned: msg.pinned
+        if (msg.kind === 'open-and-update') {
+            chrome.tabs.create({url: msg.url, windowId: msg.windowId, active: msg.active, index: msg.index}, tab => {
+                if (msg.groupId > -1){
+                    chrome.tabs.group({tabIds: tab.id, groupId: msg.groupId})
+                }
             });
+        }
+        if (msg.kind === 'open-request-new-tab') {
+            chrome.tabs.create({url: msg.url, pinned: msg.pinned, active: msg.active});
         }
     })
 })
