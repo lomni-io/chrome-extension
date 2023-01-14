@@ -100,7 +100,14 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
             chrome.tabs.remove(msg.tab)
         }
         if (msg.kind === 'move-tab') {
-            chrome.tabs.move(msg.tab, {windowId: msg.windowId, index: msg.index})
+            chrome.tabs.update(msg.tab, {pinned: false}, () => {
+                if (msg.groupId === -1){
+                    chrome.tabs.ungroup(msg.tab)
+                }else{
+                    chrome.tabs.group({tabIds: msg.tab, groupId: msg.groupId})
+                }
+                chrome.tabs.move(msg.tab, {windowId: msg.windowId, index: msg.index})
+            })
         }
         if (msg.kind === 'group-tabs') {
             chrome.tabs.group({tabIds: msg.tabs, groupId: msg.groupId})
