@@ -112,6 +112,9 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         if (msg.kind === 'group-tabs') {
             chrome.tabs.group({tabIds: msg.tabs, groupId: msg.groupId})
         }
+        if (msg.kind === 'ungroup-tabs') {
+            chrome.tabs.ungroup(msg.tabs)
+        }
         if (msg.kind === 'unpin-tab') {
             chrome.tabs.update(msg.tab, {pinned: false})
         }
