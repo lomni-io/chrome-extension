@@ -1,6 +1,45 @@
 
+// chrome.history.getVisits({url: "https://lomni.io/"},(res) => {
+//     console.log("visits", res)
+// })
+
 chrome.runtime.onConnectExternal.addListener(function(port) {
     console.log("onConnectExternal", port)
+
+    chrome.commands.onCommand.addListener((command) => {
+        if (command === 'moveFrameUp'){
+            chrome.tabs.query({active: true, lastFocusedWindow: true},  tabs => {
+                chrome.tabs.move(tabs[0].id, {windowId: tabs[0].windowId, index: tabs[0].index-1})
+            })
+        }
+        if (command === 'moveFrameDown'){
+            chrome.tabs.query({active: true, lastFocusedWindow: true},  tabs => {
+                chrome.tabs.move(tabs[0].id, {windowId: tabs[0].windowId, index: tabs[0].index+1})
+            })
+        }
+        if (command === 'moveUp'){
+            chrome.tabs.query({active: true, lastFocusedWindow: true},  activeTabs => {
+                if (activeTabs.length > 0 && activeTabs[0].index > 0){
+                    chrome.tabs.query({index: activeTabs[0].index-1, lastFocusedWindow: true},  previewsTab => {
+                        if (previewsTab.length > 0){
+                            chrome.tabs.update(previewsTab[0].id, {active: true})
+                        }
+                    })
+                }
+            })
+        }
+        if (command === 'moveDown'){
+            chrome.tabs.query({active: true, lastFocusedWindow: true},  activeTabs => {
+                if (activeTabs.length > 0){
+                    chrome.tabs.query({index: activeTabs[0].index+1, lastFocusedWindow: true},  nextTab => {
+                        if (nextTab.length > 0){
+                            chrome.tabs.update(nextTab[0].id, {active: true})
+                        }
+                    })
+                }
+            })
+        }
+    });
 
     chrome.tabs.onActivated.addListener((info) =>{
         chrome.tabs.query({}, tabs => {
