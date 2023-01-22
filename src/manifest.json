@@ -49,5 +49,5 @@
     }
   ],
 
-  "permissions": [ "tabs" , "nativeMessaging", "tabGroups", "favicon"]
+  "permissions": [ "tabs" , "nativeMessaging", "tabGroups", "favicon", "bookmarks"]
 }

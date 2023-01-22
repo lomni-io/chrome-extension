@@ -3,8 +3,42 @@
 //     console.log("visits", res)
 // })
 
+chrome.runtime.onInstalled.addListener(() => {
+    console.log("startup")
+
+    chrome.bookmarks.search({title: 'lomni'},results => {
+        let hasLomniFolder = false
+        results.forEach(folder => {
+            if (folder.title === 'lomni'){
+                hasLomniFolder = true
+                return
+            }
+        })
+        if (!hasLomniFolder){
+            chrome.bookmarks.create({title: 'lomni'})
+        }
+        console.log("bookmarks.search.lomni:: ", results, hasLomniFolder)
+    })
+})
+
 chrome.runtime.onConnectExternal.addListener(function(port) {
     console.log("onConnectExternal", port)
+
+    chrome.bookmarks.search({},results => {
+        console.log("bookmarks.search:: ", results)
+    })
+
+    chrome.bookmarks.onCreated.addListener((id, bookmark) => {
+        console.log("bookmarks.onCreated", id, bookmark)
+    })
+
+    chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
+        console.log("bookmarks.onChanged", id, changeInfo)
+    })
+
+    chrome.bookmarks.onRemoved.addListener((id, changeInfo) => {
+        console.log("bookmarks.onRemoved", id, changeInfo)
+    })
 
     chrome.commands.onCommand.addListener((command) => {
         if (command === 'moveFrameUp'){
