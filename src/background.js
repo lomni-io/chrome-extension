@@ -17,6 +17,9 @@ chrome.runtime.onInstalled.addListener(() => {
         if (!hasLomniFolder){
             chrome.bookmarks.create({title: 'lomni'})
         }
+
+        // TESTING
+        // chrome.bookmarks.create({url: 'https://lomni.io', parentId: '1', title: 'page title 8'})
         console.log("bookmarks.search.lomni:: ", results, hasLomniFolder)
     })
 })
@@ -25,19 +28,38 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
     console.log("onConnectExternal", port)
 
     chrome.bookmarks.search({},results => {
-        console.log("bookmarks.search:: ", results)
+        port.postMessage({
+            kind: 'all-bookmarks-response',
+            data: results
+        });
     })
 
     chrome.bookmarks.onCreated.addListener((id, bookmark) => {
-        console.log("bookmarks.onCreated", id, bookmark)
+        port.postMessage({
+            kind: 'bookmark-created-response',
+            data: {id: id, bookmark: bookmark}
+        });
+    })
+
+    chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
+        port.postMessage({
+            kind: 'bookmark-moved-response',
+            data: {id: id, moveInfo: moveInfo}
+        });
     })
 
     chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
-        console.log("bookmarks.onChanged", id, changeInfo)
+        port.postMessage({
+            kind: 'bookmark-changed-response',
+            data: {id: id, changeInfo: changeInfo}
+        });
     })
 
     chrome.bookmarks.onRemoved.addListener((id, changeInfo) => {
-        console.log("bookmarks.onRemoved", id, changeInfo)
+        port.postMessage({
+            kind: 'bookmark-rmoved-response',
+            data: {id: id, changeInfo: changeInfo}
+        });
     })
 
     chrome.commands.onCommand.addListener((command) => {
@@ -200,6 +222,27 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         }
         if (msg.kind === 'open-request-new-tab') {
             chrome.tabs.create({url: msg.url, pinned: msg.pinned, active: msg.active});
+        }
+        if (msg.kind === 'upsert-bookmark') {
+            chrome.bookmarks.search({title: 'lomni'},results => {
+                if (results.length === 0){
+                    return
+                }
+
+                const parentFolder = results[0]
+                chrome.bookmarks.getChildren(parentFolder.id, bookmarks => {
+                    const currentBookmark = bookmarks.find(b => b.url === msg.url)
+                    console.log('total', msg, bookmarks, currentBookmark)
+                    if (currentBookmark){
+                        // update here
+                        chrome.bookmarks.update(currentBookmark.id, {title: msg.title})
+                    }else{
+                        // create here
+                        chrome.bookmarks.create({url: msg.url, parentId: parentFolder.id, title: msg.title})
+                    }
+                })
+            })
+            chrome.tabGroups.update(msg.group, {color: msg.color})
         }
     })
 })
