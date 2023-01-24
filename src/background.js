@@ -27,6 +27,13 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onConnectExternal.addListener(function(port) {
     console.log("onConnectExternal", port)
 
+    chrome.bookmarks.getTree(result => {
+        port.postMessage({
+            kind: 'all-bookmarks-tree-response',
+            data: result
+        });
+    })
+
     chrome.bookmarks.search({},results => {
         port.postMessage({
             kind: 'all-bookmarks-response',
