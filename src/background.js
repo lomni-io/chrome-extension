@@ -42,31 +42,55 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
     })
 
     chrome.bookmarks.onCreated.addListener((id, bookmark) => {
-        port.postMessage({
-            kind: 'bookmark-created-response',
-            data: {id: id, bookmark: bookmark}
-        });
+        chrome.bookmarks.getTree(result => {
+            port.postMessage({
+                kind: 'all-bookmarks-tree-response',
+                data: result
+            });
+        })
+        // port.postMessage({
+        //     kind: 'bookmark-created-response',
+        //     data: {id: id, bookmark: bookmark}
+        // });
     })
 
     chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
-        port.postMessage({
-            kind: 'bookmark-moved-response',
-            data: {id: id, moveInfo: moveInfo}
-        });
+        chrome.bookmarks.getTree(result => {
+            port.postMessage({
+                kind: 'all-bookmarks-tree-response',
+                data: result
+            });
+        })
+        // port.postMessage({
+        //     kind: 'bookmark-moved-response',
+        //     data: {id: id, moveInfo: moveInfo}
+        // });
     })
 
     chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
-        port.postMessage({
-            kind: 'bookmark-changed-response',
-            data: {id: id, changeInfo: changeInfo}
-        });
+        chrome.bookmarks.getTree(result => {
+            port.postMessage({
+                kind: 'all-bookmarks-tree-response',
+                data: result
+            });
+        })
+        // port.postMessage({
+        //     kind: 'bookmark-changed-response',
+        //     data: {id: id, changeInfo: changeInfo}
+        // });
     })
 
     chrome.bookmarks.onRemoved.addListener((id, changeInfo) => {
-        port.postMessage({
-            kind: 'bookmark-rmoved-response',
-            data: {id: id, changeInfo: changeInfo}
-        });
+        chrome.bookmarks.getTree(result => {
+            port.postMessage({
+                kind: 'all-bookmarks-tree-response',
+                data: result
+            });
+        })
+        // port.postMessage({
+        //     kind: 'bookmark-rmoved-response',
+        //     data: {id: id, changeInfo: changeInfo}
+        // });
     })
 
     chrome.commands.onCommand.addListener((command) => {
