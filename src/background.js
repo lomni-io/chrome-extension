@@ -4,8 +4,20 @@
 // })
 
 chrome.runtime.onInstalled.addListener(() => {
+    console.log(faviconURL("https://google.com"))
     console.log("startup")
 })
+
+function faviconURL(u) {
+    const url = new URL(chrome.runtime.getURL("/_favicon/"));
+    url.searchParams.set("pageUrl", u);
+    url.searchParams.set("size", "32");
+    return url.toString();
+}
+
+function enhanceTreeResponse(nodeTree){
+    return nodeTree.map(node => ({ ...node, favIconUrl: faviconURL(node.url) }))
+}
 
 chrome.runtime.onConnectExternal.addListener(function(port) {
     console.log("onConnectExternal", port)
@@ -20,7 +32,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
     chrome.bookmarks.search({},results => {
         port.postMessage({
             kind: 'all-bookmarks-response',
-            data: results
+            data: enhanceTreeResponse(results)
         });
     })
 
