@@ -3,8 +3,90 @@
 //     console.log("visits", res)
 // })
 
+chrome.runtime.onInstalled.addListener(() => {
+    console.log(faviconURL("https://google.com"))
+    console.log("startup")
+})
+
+function faviconURL(u) {
+    const url = new URL(chrome.runtime.getURL("/_favicon/"));
+    url.searchParams.set("pageUrl", u);
+    url.searchParams.set("size", "32");
+    return url.toString();
+}
+
+function enhanceTreeResponse(nodeTree){
+    return nodeTree.map(node => ({ ...node, favIconUrl: faviconURL(node.url) }))
+}
+
 chrome.runtime.onConnectExternal.addListener(function(port) {
     console.log("onConnectExternal", port)
+
+    chrome.bookmarks.getTree(result => {
+        port.postMessage({
+            kind: 'all-bookmarks-tree-response',
+            data: result
+        });
+    })
+
+    chrome.bookmarks.search({},results => {
+        port.postMessage({
+            kind: 'all-bookmarks-response',
+            data: enhanceTreeResponse(results)
+        });
+    })
+
+    chrome.bookmarks.onCreated.addListener((id, bookmark) => {
+        chrome.bookmarks.getTree(result => {
+            port.postMessage({
+                kind: 'all-bookmarks-tree-response',
+                data: result
+            });
+        })
+        // port.postMessage({
+        //     kind: 'bookmark-created-response',
+        //     data: {id: id, bookmark: bookmark}
+        // });
+    })
+
+    chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
+        chrome.bookmarks.getTree(result => {
+            port.postMessage({
+                kind: 'all-bookmarks-tree-response',
+                data: result
+            });
+        })
+        // port.postMessage({
+        //     kind: 'bookmark-moved-response',
+        //     data: {id: id, moveInfo: moveInfo}
+        // });
+    })
+
+    chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
+        chrome.bookmarks.getTree(result => {
+            port.postMessage({
+                kind: 'all-bookmarks-tree-response',
+                data: result
+            });
+        })
+        // port.postMessage({
+        //     kind: 'bookmark-changed-response',
+        //     data: {id: id, changeInfo: changeInfo}
+        // });
+    })
+
+    chrome.bookmarks.onRemoved.addListener((id, changeInfo) => {
+        chrome.bookmarks.getTree(result => {
+            port.postMessage({
+                kind: 'all-bookmarks-tree-response',
+                data: result
+            });
+        })
+        // port.postMessage({
+        //     kind: 'bookmark-rmoved-response',
+        //     data: {id: id, changeInfo: changeInfo}
+        // });
+    })
 
     chrome.commands.onCommand.addListener((command) => {
         if (command === 'moveFrameUp'){
@@ -166,6 +248,15 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         }
         if (msg.kind === 'open-request-new-tab') {
             chrome.tabs.create({url: msg.url, pinned: msg.pinned, active: msg.active});
+        }
+        if (msg.kind === 'create-bookmark') {
+            chrome.bookmarks.create({url: msg.url, title: msg.title})
+        }
+        if (msg.kind === 'remove-bookmark') {
+            chrome.bookmarks.remove(msg.id)
+        }
+        if (msg.kind === 'update-bookmark') {
+            chrome.bookmarks.update(msg.id, {url: msg.url, title: msg.title})
         }
     })
 })
