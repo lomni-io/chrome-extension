@@ -22,6 +22,27 @@ function enhanceTreeResponse(nodeTree){
 chrome.runtime.onConnectExternal.addListener(function(port) {
     console.log("onConnectExternal", port)
 
+    chrome.history.search({maxResults: 500, text: ''}, result => {
+        port.postMessage({
+            kind: 'all-history-search-response',
+            data: result
+        });
+    })
+
+    chrome.history.onVisited.addListener(result => {
+        port.postMessage({
+            kind: 'history-visited-response',
+            data: result
+        });
+    })
+
+    chrome.history.onVisitRemoved.addListener(result => {
+        port.postMessage({
+            kind: 'history-visited-response',
+            data: result
+        });
+    })
+
     chrome.bookmarks.getTree(result => {
         port.postMessage({
             kind: 'all-bookmarks-tree-response',
@@ -43,10 +64,6 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
                 data: result
             });
         })
-        // port.postMessage({
-        //     kind: 'bookmark-created-response',
-        //     data: {id: id, bookmark: bookmark}
-        // });
     })
 
     chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
@@ -82,10 +99,6 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
                 data: result
             });
         })
-        // port.postMessage({
-        //     kind: 'bookmark-rmoved-response',
-        //     data: {id: id, changeInfo: changeInfo}
-        // });
     })
 
     chrome.commands.onCommand.addListener((command) => {
@@ -230,6 +243,9 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
                 chrome.tabs.move(msg.tab, {windowId: msg.windowId, index: msg.index})
             })
         }
+        if (msg.kind === 'move-group'){
+            chrome.tabGroups.move(msg.id, {index: msg.index})
+        }
         if (msg.kind === 'group-tabs') {
             chrome.tabs.group({tabIds: msg.tabs, groupId: msg.groupId})
         }
@@ -245,6 +261,9 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
                     chrome.tabs.group({tabIds: tab.id, groupId: msg.groupId})
                 }
             });
+        }
+        if (msg.kind === 'duplicate-tab'){
+            chrome.tabs.duplicate(msg.id)
         }
         if (msg.kind === 'open-request-new-tab') {
             chrome.tabs.create({url: msg.url, pinned: msg.pinned, active: msg.active});
