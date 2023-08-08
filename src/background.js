@@ -3,6 +3,11 @@
 //     console.log("visits", res)
 // })
 
+
+chrome.action.onClicked.addListener((tab) => {
+    // chrome.sidePanel.open({windowId: tab.windowId });
+});
+
 chrome.runtime.onInstalled.addListener(() => {
     console.log(faviconURL("https://google.com"))
     console.log("startup")
