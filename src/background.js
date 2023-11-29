@@ -9,6 +9,14 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
+    chrome.management.getSelf(info => {
+        if (info.installType === 'development') {
+            chrome.sidePanel.setOptions({ path: 'sidepanel-iframe.html'});
+        }else {
+            chrome.sidePanel.setOptions({ path: 'sidepanel-iframe.html'});
+        }
+    })
+    
     console.log(faviconURL("https://google.com"))
     console.log("startup")
 })
@@ -25,7 +33,6 @@ function enhanceTreeResponse(nodeTree){
 }
 
 chrome.runtime.onConnectExternal.addListener(function(port) {
-    console.log("onConnectExternal", port)
 
     chrome.history.search({maxResults: 500, text: ''}, result => {
         port.postMessage({

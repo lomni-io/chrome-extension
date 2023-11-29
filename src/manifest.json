@@ -5,7 +5,7 @@
   "description": "Your unique sidebar to enhance produtivity.",
   "key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApnn+5+FJ0dT0mRZnq9oX\n6GIann8l/F5QUHNuXH/g1w8zWUzr5XOJ5hM7cIgNveb6y35XNfk1nMrP73FVVTpl\nBVUIi2qYKdtFiGOygEKT7iHszDqF5pmbtgE0YWT/D2uJvGpE7RZQQGMft7PTu7S6\nwfj7ssLgYFmLfrW5/9zWWKVPNhACDuZMMONxfHxNhnn/cmAHdsFP89h+1rSOY4oG\n4QGeeDqJn43MyTEbFIzc2qC4UBTXF32xl7DCNA9UR4s+AcyklHyYU8Hxf/vlMfPF\ngjUm0AsVtCvJU/Bm+64dUhXOlZvJGaOEbByjkxmYVYWvpj2SfTF3u0a5nyRIXRHe\n0QIDAQAB\n-----END PUBLIC KEY-----",
   "externally_connectable": {
-    "matches": ["http://localhost:8080/*", "https://lomni-io.github.io/*", "https://lomni.io/*"]
+    "matches": ["http://localhost:*/*", "https://lomni-io.github.io/*", "https://lomni.io/*"]
   },
   "icons": {
     "16": "/icons/favicon-16x16.png",
@@ -21,9 +21,6 @@
   },
   "background":{
     "service_worker": "background.js"
-  },
-  "side_panel": {
-    "default_path": "sidepanel.html"
   },
 
   "commands": {
